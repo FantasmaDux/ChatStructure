@@ -1,0 +1,6 @@
+[submodule "component/AuthMicro"]
+	path = component/AuthMicro
+	url = git@github.com:PavelShe11/AuthMicro.git
+[submodule "component/MessengerMicro"]
+	path = component/MessengerMicro
+	url = git@github.com:PavelShe11/MessengerMicro.git
