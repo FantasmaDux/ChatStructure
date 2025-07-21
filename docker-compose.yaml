@@ -10,7 +10,7 @@ services:
     env_file:
       - ./.env
     environment:
-      PGHOST: auth-db-postgres
+      PGHOST: ${AUTH_POSTGRES_DB_HOST}
       PGUSER: ${AUTH_POSTGRES_DB_USER}
       PGPASSWORD: ${AUTH_POSTGRES_DB_PASSWORD}
       PGDATABASE: ${AUTH_POSTGRES_DB_NAME}
