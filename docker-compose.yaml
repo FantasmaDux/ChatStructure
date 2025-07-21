@@ -63,7 +63,7 @@ services:
     env_file:
       - ./.env
     environment:
-      DB_HOST: networking-db-postgres
+      DB_HOST: ${NETWORKING_POSTGRES_DB_HOST}
       DB_NAME: ${NETWORKING_POSTGRES_DB_NAME}
       DB_PORT: ${NETWORKING_POSTGRES_DB_INTERNAL_PORT}
       DB_USER: ${NETWORKING_POSTGRES_DB_USER}
