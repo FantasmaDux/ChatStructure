@@ -1,26 +1,42 @@
 services:
+#  traefik:
+#    image: traefik:v3.4
+#    container_name: traefik
+#    restart: unless-stopped
+#    security_opt:
+#      - no-new-privileges:true
+#    networks:
+#      # Connect to the 'traefik_proxy' overlay network for inter-container communication across nodes
+#      - proxy
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#    volumes:
+#      - /var/run/docker.sock:/var/run/docker.sock:ro
+#      - ./certs:/certs:ro
+#      - ./dynamic:/dynamic:ro
+#      - ./traefic.yml:/traefic.yml:ro
+
   auth-service:
     container_name: auth-service
     build:
       context: ./component/AuthMicro
       dockerfile: Dockerfile
     ports:
-      - "${HTTP_PORT}:${HTTP_PORT}"
-      - "${GRPC_PORT}:${GRPC_PORT}"
+      - "8081:8080"
+      - "9091:9091"
     env_file:
       - ./.env
     environment:
-      PGHOST: ${AUTH_POSTGRES_DB_HOST}
-      PGUSER: ${AUTH_POSTGRES_DB_USER}
-      PGPASSWORD: ${AUTH_POSTGRES_DB_PASSWORD}
-      PGDATABASE: ${AUTH_POSTGRES_DB_NAME}
-      PGPORT: ${AUTH_POSTGRES_DB_INTERNAL_PORT}
-      PGSSLMODE: ${AUTH_PGSSLMODE_STATUS}
+      POSTGRES_DB_HOST: ${AUTH_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${AUTH_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${AUTH_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_DB_PASSWORD}
+      POSTGRES_DB_INTERNAL_PORT: ${AUTH_POSTGRES_DB_INTERNAL_PORT}
+      PGSSLMODE_STATUS: ${AUTH_PGSSLMODE_STATUS}
       JWT_SECRET: ${JWT_SECRET}
-      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}  # minutes
-      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}  # 7 days in minutes
-      HTTP_SERVER_ADDRESS: 0.0.0.0:${HTTP_PORT}
-      GRPC_SERVER_ADDRESS: 0.0.0.0:${GRPC_PORT}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
       LOG_LEVEL: debug
     depends_on:
       auth-db-postgres:
@@ -59,16 +75,17 @@ services:
       context: ./component/NetworkingMicro
       dockerfile: Dockerfile
     ports:
-      - "8083:8083"
+      - "8082:8080"
+      - "9092:9092"
     env_file:
       - ./.env
     environment:
-      DB_HOST: ${NETWORKING_POSTGRES_DB_HOST}
-      DB_NAME: ${NETWORKING_POSTGRES_DB_NAME}
-      DB_PORT: ${NETWORKING_POSTGRES_DB_INTERNAL_PORT}
-      DB_USER: ${NETWORKING_POSTGRES_DB_USER}
-      DB_PASS: ${NETWORKING_POSTGRES_DB_PASSWORD}
-      DB_SSLMODE: ${NETWORKING_PGSSLMODE_STATUS}
+      POSTGRES_DB_HOST: ${NETWORKING_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${NETWORKING_POSTGRES_DB_NAME}
+      POSTGRES_DB_INTERNAL_PORT: ${NETWORKING_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_USER: ${NETWORKING_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${NETWORKING_POSTGRES_DB_PASSWORD}
+      PGSSLMODE_STATUS: ${NETWORKING_PGSSLMODE_STATUS}
       DB_AUTO_MIGRATE: true
       LOG_OUTPUT: file
       LOG_DIR: logs
@@ -79,7 +96,8 @@ services:
     networks:
       - networking-network
       - shared-network
-  
+
+
   networking-db-postgres:
     container_name: networking-db-postgres
     image: postgres:16-alpine
