@@ -1,0 +1,19 @@
+http:
+  services:
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://auth-service:8080"
+        healthCheck:
+          path: "/actuator/health"
+          interval: "10s"
+          timeout: "3s"
+
+    networking-service:
+      loadBalancer:
+        servers:
+          - url: "http://networking-service:8080"
+        healthCheck:
+          path: "/actuator/health"
+          interval: "10s"
+          timeout: "3s"

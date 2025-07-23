@@ -1,0 +1,17 @@
+http:
+  routers:
+    auth-service:
+      rule: "PathPrefix(`/auth`)"
+      service: auth-service
+      entryPoints:
+        - web
+      middlewares:
+        - strip-auth-prefix
+
+    networking-service:
+      rule: "PathPrefix(`/networking`)"
+      service: networking-service
+      entryPoints:
+        - web
+      middlewares:
+        - strip-networking-prefix
