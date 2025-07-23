@@ -1,30 +1,59 @@
 services:
-#  traefik:
-#    image: traefik:v3.4
-#    container_name: traefik
-#    restart: unless-stopped
-#    security_opt:
-#      - no-new-privileges:true
-#    networks:
-#      # Connect to the 'traefik_proxy' overlay network for inter-container communication across nodes
-#      - proxy
-#    ports:
-#      - "80:80"
-#      - "443:443"
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#      - ./certs:/certs:ro
-#      - ./dynamic:/dynamic:ro
-#      - ./traefic.yml:/traefic.yml:ro
+  traefik:
+    image: traefik:v3.4
+    container_name: traefik
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - shared-network
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "8088:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./certs:/certs:ro
+      - ./dynamic:/dynamic:ro
+    depends_on:
+      - auth-service
+      - networking-service
+    command:
+      # EntryPoints
+      - "--entrypoints.web.address=:80"
+
+      # Providers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=shared-network"
+
+      # API & Dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+
+      # Observability
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+
+    # Traefik Dynamic configuration via Docker labels
+    labels:
+      # Enable self‑routing
+      - "traefik.enable=true"
+
+      # Dashboard router
+      - "traefik.http.routers.dashboard.rule=Host(`dashboard.localhost`)"
+      - "traefik.http.routers.dashboard.entrypoints=web"
+      - "traefik.http.routers.dashboard.service=api@internal"
+
+      # Basic‑auth middleware
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=admin:$$apr1$$Ix/DNcdM$$Q4h9gndRrltOLSIKsv5fx1"
+      - "traefik.http.routers.dashboard.middlewares=dashboard-auth@docker"
 
   auth-service:
     container_name: auth-service
     build:
       context: ./component/AuthMicro
       dockerfile: Dockerfile
-    ports:
-      - "8081:8080"
-      - "9091:9091"
     env_file:
       - ./.env
     environment:
@@ -45,6 +74,20 @@ services:
     networks:
       - auth-network
       - shared-network
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.auth-service.rule=PathPrefix(`/auth`)"
+      - "traefik.http.routers.auth-service.entrypoints=web"
+      - "traefik.http.routers.auth-service.middlewares=strip-auth-prefix"
+      - "traefik.http.middlewares.strip-auth-prefix.stripprefix.prefixes=/auth"
+      - "traefik.http.services.auth-service.loadbalancer.server.port=8080"
+      - "traefik.http.services.auth-service.loadbalancer.healthcheck.path=/actuator/health"
+
 
   auth-db-postgres:
     container_name: auth-db-postgres
@@ -74,9 +117,6 @@ services:
     build:
       context: ./component/NetworkingMicro
       dockerfile: Dockerfile
-    ports:
-      - "8082:8080"
-      - "9092:9092"
     env_file:
       - ./.env
     environment:
@@ -96,7 +136,19 @@ services:
     networks:
       - networking-network
       - shared-network
-
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.networking-service.rule=PathPrefix(`/networking`)"
+      - "traefik.http.routers.networking-service.entrypoints=web"
+      - "traefik.http.routers.networking-service.middlewares=strip-networking-prefix"
+      - "traefik.http.middlewares.strip-networking-prefix.stripprefix.prefixes=/networking"
+      - "traefik.http.services.networking-service.loadbalancer.server.port=8080"
+      - "traefik.http.services.networking-service.loadbalancer.healthcheck.path=/actuator/health"
 
   networking-db-postgres:
     container_name: networking-db-postgres
@@ -127,9 +179,13 @@ volumes:
 
 networks:
   shared-network:
+    name: shared-network
     driver: bridge
 
   auth-network:
+    name: auth-network
     driver: bridge
+
   networking-network:
+    name: networking-network
     driver: bridge
