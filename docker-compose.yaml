@@ -46,10 +46,12 @@ services:
       - auth-network
       - shared-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:80/actuator/health" ]
       interval: 10s
       timeout: 3s
       retries: 5
+    ports:
+      - "80:80"
 
   auth-db-postgres:
     container_name: auth-db-postgres
@@ -99,7 +101,7 @@ services:
       - networking-network
       - shared-network
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:80/actuator/health" ]
       interval: 10s
       timeout: 3s
       retries: 5
@@ -116,7 +118,7 @@ services:
       POSTGRES_PASSWORD: ${NETWORKING_POSTGRES_DB_PASSWORD}
     volumes:
       - networking-db-postgres:/var/lib/postgresql/data
-      - ./component/NetworkingMicro/init.sql:/docker-entrypoint-initdb.d/init.sql
+#      - ./component/NetworkingMicro/init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $NETWORKING_POSTGRES_DB_USER -d $NETWORKING_POSTGRES_DB_NAME'" ]
       interval: ${HEALTHCHECK_INTERVAL}
