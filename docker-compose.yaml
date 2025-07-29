@@ -1,7 +1,6 @@
 services:
   traefik:
     image: traefik:v3.4
-    container_name: traefik
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -21,7 +20,6 @@ services:
 
 
   auth-service:
-    container_name: auth-service
     build:
       context: ./component/AuthMicro
       dockerfile: Dockerfile
@@ -45,16 +43,10 @@ services:
     networks:
       - auth-network
       - shared-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${AUTH_HTTP}/actuator/health" ]
-      interval: 10s
-      timeout: 3s
-      retries: 5
     ports:
       - "8080:8080"
 
   auth-db-postgres:
-    container_name: auth-db-postgres
     image: postgres:16-alpine
     ports:
       - "${AUTH_POSTGRES_DB_EXTERNAL_PORT}:${AUTH_POSTGRES_DB_INTERNAL_PORT}"
@@ -77,7 +69,6 @@ services:
 
 
   networking-service:
-    container_name: networking-service
     build:
       context: ./component/NetworkingMicro
       dockerfile: Dockerfile
@@ -100,14 +91,8 @@ services:
     networks:
       - networking-network
       - shared-network
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${NETWORKING_HTTP}/actuator/health" ]
-      interval: 10s
-      timeout: 3s
-      retries: 5
 
   networking-db-postgres:
-    container_name: networking-db-postgres
     image: postgres:16-alpine
     ports:
       - "${NETWORKING_POSTGRES_DB_EXTERNAL_PORT}:${NETWORKING_POSTGRES_DB_INTERNAL_PORT}"
