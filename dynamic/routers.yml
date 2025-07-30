@@ -5,13 +5,13 @@ http:
       service: auth-service
       entryPoints:
         - web
-      middlewares:
-        - strip-auth-prefix
+#      middlewares:
+#        - strip-auth-prefix
 
     networking-service:
       rule: "PathPrefix(`/networking`)"
       service: networking-service
       entryPoints:
         - web
-      middlewares:
-        - strip-networking-prefix
+#      middlewares:
+#        - strip-networking-prefix
