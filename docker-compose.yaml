@@ -43,8 +43,6 @@ services:
     networks:
       - auth-network
       - shared-network
-    ports:
-      - "8080:8080"
 
   auth-db-postgres:
     image: postgres:16-alpine
