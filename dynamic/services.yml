@@ -5,7 +5,7 @@ http:
         servers:
           - url: "http://auth-service:8080"
         healthCheck:
-          path: "/actuator/selfHealth"
+          path: "/actuator/health"
           interval: "10s"
           timeout: "3s"
 
