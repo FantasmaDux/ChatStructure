@@ -33,11 +33,13 @@ docker compose down -v && docker compose up --build
 
 ## 🌐 Доступные эндпоинты
 
-| URL                           | Описание                     | Сервис              |
-| ----------------------------- | ---------------------------- | ------------------- |
-| `http://localhost/auth`       | Корень API авторизации       | Auth Service       |
-| `http://localhost/networking` | Корень API Networking        | Networking Service |
-| `http://dashboard.localhost`  | Интерфейс управления Traefik | Traefik Dashboard |
+| URL                                                 | Описание                     | Сервис              |
+|-----------------------------------------------------| ---------------------------- | ------------------- |
+| `http://localhost/auth`                             | Корень API авторизации       | Auth Service       |
+| `http://localhost/networking`                       | Корень API Networking        | Networking Service |
+| `http://dashboard.localhost`                        | Интерфейс управления Traefik | Traefik Dashboard |
+| `http://localhost/networking/swagger-ui/index.html` | UI документации OpenAPI | Open API UI        |
+| `http://localhost/auth/swagger-ui/index.html`       | UI документации OpenAPI | Open API UI        |
 
 
 > **Данные для входа в Dashboard (Default):** `admin / P@ssw0rd`
