@@ -39,5 +39,6 @@ docker compose down -v && docker compose up --build
 | `http://localhost/networking` | Корень API Networking                     | Networking Service |
 | `http://dashboard.localhost`  | Интерфейс управления Traefik              | Traefik Dashboard  |
 | `http://localhost/networking/swagger-ui/index.html`  | UI документации OpenAPI | Open API UI        |
+| `http://localhost/auth/swagger-ui/index.html`       | UI документации OpenAPI | Open API UI        |
 
 > **Данные для входа в Dashboard (Default):** `admin / P@ssw0rd`
