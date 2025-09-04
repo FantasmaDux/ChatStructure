@@ -4,3 +4,6 @@
 [submodule "component/NetworkingMicro"]
 	path = component/NetworkingMicro
 	url = git@github.com:PavelShe11/NetworkingMicro.git
+[submodule "component/WebSocketHub"]
+	path = component/WebSocketHub
+	url = git@github.com:PavelShe11/WebSocketHub.git
