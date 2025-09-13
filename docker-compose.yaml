@@ -101,6 +101,7 @@ services:
       POSTGRES_PASSWORD: ${NETWORKING_POSTGRES_DB_PASSWORD}
     volumes:
       - networking-db-postgres:/var/lib/postgresql/data
+      - ./component/NetworkingMicro/src/main/resources/data/tables_postgres.sql:/docker-entrypoint-initdb.d/tables_postgres.sql
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $NETWORKING_POSTGRES_DB_USER -d $NETWORKING_POSTGRES_DB_NAME'" ]
       interval: ${HEALTHCHECK_INTERVAL}
