@@ -7,3 +7,6 @@
 [submodule "component/WebSocketHub"]
 	path = component/WebSocketHub
 	url = git@github.com:PavelShe11/WebSocketHub.git
+[submodule "component/MessengerMicro"]
+	path = component/MessengerMicro
+	url = git@github.com:PavelShe11/MessengerMicro.git
