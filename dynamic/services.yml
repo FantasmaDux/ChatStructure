@@ -17,3 +17,12 @@ http:
           path: "/actuator/health"
           interval: "10s"
           timeout: "3s"
+
+    messenger-service:
+      loadBalancer:
+        servers:
+          - url: "http://messenger-service:8080"
+        healthCheck:
+          path: "/actuator/health"
+          interval: "10s"
+          timeout: "3s"

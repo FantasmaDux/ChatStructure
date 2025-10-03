@@ -15,3 +15,11 @@ http:
         - web
 #      middlewares:
 #        - strip-networking-prefix
+
+    messenger-service:
+      rule: "PathPrefix(`/messenger`)"
+      service: messenger-service
+      entryPoints:
+        - web
+#      middlewares:
+#        - strip-networking-prefix
