@@ -23,3 +23,11 @@ http:
         - web
 #      middlewares:
 #        - strip-networking-prefix
+
+    kafka-ui:
+      rule: "PathPrefix(`/kafka-ui`)"
+      service: kafka-ui
+      entryPoints:
+        - web
+      middlewares:
+        - strip-kafka-ui-prefix
