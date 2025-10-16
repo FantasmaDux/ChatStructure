@@ -1,5 +1,6 @@
 services:
   traefik:
+    container_name: traefik
     image: traefik:v3.4
     restart: unless-stopped
     security_opt:
@@ -158,6 +159,7 @@ services:
 
 
   kafka:
+    container_name: kafka
     image: apache/kafka:4.1.0
     environment:
       - KAFKA_NODE_ID=1
@@ -175,12 +177,13 @@ services:
       - shared-network
 
   kafka-ui:
+    container_name: kafka-ui
     image: provectuslabs/kafka-ui
     restart: "always"
     environment:
+      KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9098
-    ports:
-      - "8089:8080"
+      SERVER_SERVLET_CONTEXT_PATH: /kafka-ui
     depends_on:
       - kafka
     networks:

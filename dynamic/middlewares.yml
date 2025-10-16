@@ -9,10 +9,3 @@
 #      stripPrefix:
 #        prefixes:
 #          - /networking
-
-http:
-  middlewares:
-    strip-kafka-ui-prefix:
-      stripPrefix:
-        prefixes:
-          - "/kafka-ui"

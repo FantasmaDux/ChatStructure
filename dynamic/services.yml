@@ -28,11 +28,7 @@ http:
           timeout: "3s"
 
 
-    kafka-ui:
+    kafka-ui-service:  # должно быть уникальным
       loadBalancer:
         servers:
           - url: "http://kafka-ui:8080"
-        healthCheck:
-          path: "/actuator/health"
-          interval: "10s"
-          timeout: "3s"
