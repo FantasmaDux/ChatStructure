@@ -41,6 +41,6 @@ docker compose down -v && docker compose up --build
 | `http://localhost/networking/swagger-ui/index.html` | UI документации OpenAPI      | Open API UI        |
 | `http://localhost/auth/swagger-ui/index.html`       | UI документации OpenAPI      | Open API UI        |
 | `http://localhost/messenger/swagger-ui.html`        | UI документации OpenAPI      | Open API UI        |
-| `http://localhost:8089/`                            | Kafka UI                     | Kafka UI           |
+| `http://localhost/kafka-ui`                          | Kafka UI                     | Kafka UI           |
 
 > **Данные для входа в Dashboard (Default):** `admin / P@ssw0rd`
