@@ -2,9 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/component/AuthMicro" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/component/MessengerMicro" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/component/NetworkingMicro" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/component/WebSocketHub" vcs="Git" />
   </component>
 </project>

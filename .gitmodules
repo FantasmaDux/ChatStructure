@@ -1,12 +1,12 @@
 [submodule "component/AuthMicro"]
 	path = component/AuthMicro
-	url = git@github.com:PavelShe11/AuthMicro.git
-[submodule "component/NetworkingMicro"]
-	path = component/NetworkingMicro
-	url = git@github.com:PavelShe11/NetworkingMicro.git
-[submodule "component/WebSocketHub"]
-	path = component/WebSocketHub
-	url = git@github.com:PavelShe11/WebSocketHub.git
-[submodule "component/MessengerMicro"]
-	path = component/MessengerMicro
-	url = git@github.com:PavelShe11/MessengerMicro.git
+	url = git@github.com:FantasmaDux/AuthMicro.git
+[submodule "component/UserMicro"]
+	path = component/UserMicro
+	url = git@github.com:FantasmaDux/UserMicro.git
+[submodule "component/WebsocketMicro"]
+	path = component/WebsocketMicro
+	url = git@github.com:FantasmaDux/WebsocketMicro.git
+[submodule "component/ChatMicro"]
+	path = component/ChatMicro
+	url = git@github.com:FantasmaDux/ChatMicro.git

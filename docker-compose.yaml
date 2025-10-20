@@ -67,9 +67,9 @@ services:
       - auth-network
 
 
-  networking-service:
+  user-service:
     build:
-      context: ./component/NetworkingMicro
+      context: ./component/UserMicro
       dockerfile: Dockerfile
     env_file:
       - ./.env
@@ -88,10 +88,10 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - networking-network
+      - user-network
       - shared-network
 
-  networking-db-postgres:
+  user-db-postgres:
     image: postgres:16-alpine
     ports:
       - "${NETWORKING_POSTGRES_DB_EXTERNAL_PORT}:${NETWORKING_POSTGRES_DB_INTERNAL_PORT}"
@@ -102,20 +102,20 @@ services:
       POSTGRES_PASSWORD: ${NETWORKING_POSTGRES_DB_PASSWORD}
     volumes:
       - networking-db-postgres:/var/lib/postgresql/data
-      - ./component/NetworkingMicro/src/main/resources/data/tables_postgres.sql:/docker-entrypoint-initdb.d/tables_postgres.sql
+      - ./component/UserMicro/src/main/resources/data/tables_postgres.sql:/docker-entrypoint-initdb.d/tables_postgres.sql
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $NETWORKING_POSTGRES_DB_USER -d $NETWORKING_POSTGRES_DB_NAME'" ]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}
     networks:
-      - networking-network
+      - user-network
 
 
 
-  messenger-service:
+  chat-service:
     build:
-      context: ./component/MessengerMicro
+      context: ./component/ChatMicro
       dockerfile: Dockerfile
     env_file:
       - ./.env
@@ -134,10 +134,10 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - messenger-network
+      - chat-network
       - shared-network
 
-  messenger-db-postgres:
+  chat-db-postgres:
     image: postgres:16-alpine
     ports:
       - "${MESSENGER_POSTGRES_DB_EXTERNAL_PORT}:${MESSENGER_POSTGRES_DB_INTERNAL_PORT}"
@@ -147,14 +147,14 @@ services:
       POSTGRES_USER: ${MESSENGER_POSTGRES_DB_USER}
       POSTGRES_PASSWORD: ${MESSENGER_POSTGRES_DB_PASSWORD}
     volumes:
-      - messenger-db-postgres:/var/lib/postgresql/data
+      - chat-db-postgres:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $MESSENGER_POSTGRES_DB_USER -d $MESSENGER_POSTGRES_DB_NAME'" ]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}
     networks:
-      - messenger-network
+      - chat-network
 
   kafka:
     image: apache/kafka:4.1.0         # KRaft mode, без ZooKeeper
@@ -201,8 +201,8 @@ services:
 
 volumes:
   auth-db-postgres:
-  networking-db-postgres:
-  messenger-db-postgres:
+  user-db-postgres:
+  chat-db-postgres:
   kafka-data:
 
 networks:
@@ -214,10 +214,10 @@ networks:
     name: auth-network
     driver: bridge
 
-  networking-network:
-    name: networking-network
+  user-network:
+    name: user-network
     driver: bridge
 
-  messenger-network:
-    name: messenger-network
+  chat-network:
+    name: chat-network
     driver: bridge
