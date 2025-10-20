@@ -1,6 +1,6 @@
-rootProject.name = "CommunicatorInfrastructure"
+rootProject.name = "ChatStructure"
 
 includeBuild("component/AuthMicro")
-includeBuild("component/NetworkingMicro")
-includeBuild("component/WebSocketHub")
-includeBuild("component/MessengerMicro")
+includeBuild("component/UserMicro")
+includeBuild("component/WebsocketMicro")
+includeBuild("component/ChatMicro")
