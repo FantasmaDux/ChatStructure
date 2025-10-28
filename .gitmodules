@@ -3,7 +3,7 @@
 	url = git@github.com:FantasmaDux/AuthMicro.git
 [submodule "component/UserMicro"]
 	path = component/UserMicro
-	url = git@github.com:FantasmaDux/UserMicro.git
+	url = https://github.com/FantasmaDux/UserMicro.git
 [submodule "component/WebsocketMicro"]
 	path = component/WebsocketMicro
 	url = git@github.com:FantasmaDux/WebsocketMicro.git

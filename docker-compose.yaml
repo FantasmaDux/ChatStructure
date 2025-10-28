@@ -21,6 +21,7 @@ services:
 
 
   auth-service:
+    container_name: auth-service
     build:
       context: ./component/AuthMicro
       dockerfile: Dockerfile
@@ -74,17 +75,17 @@ services:
     env_file:
       - ./.env
     environment:
-      POSTGRES_DB_HOST: ${NETWORKING_POSTGRES_DB_HOST}
-      POSTGRES_DB: ${NETWORKING_POSTGRES_DB_NAME}
-      POSTGRES_DB_INTERNAL_PORT: ${NETWORKING_POSTGRES_DB_INTERNAL_PORT}
-      POSTGRES_USER: ${NETWORKING_POSTGRES_DB_USER}
-      POSTGRES_PASSWORD: ${NETWORKING_POSTGRES_DB_PASSWORD}
-      PGSSLMODE_STATUS: ${NETWORKING_PGSSLMODE_STATUS}
+      POSTGRES_DB_HOST: ${USER_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${USER_POSTGRES_DB_NAME}
+      POSTGRES_DB_INTERNAL_PORT: ${USER_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_USER: ${USER_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${USER_POSTGRES_DB_PASSWORD}
+      PGSSLMODE_STATUS: ${USER_PGSSLMODE_STATUS}
       DB_AUTO_MIGRATE: true
       LOG_OUTPUT: file
       LOG_DIR: logs
     depends_on:
-      networking-db-postgres:
+      user-db-postgres:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -94,17 +95,17 @@ services:
   user-db-postgres:
     image: postgres:16-alpine
     ports:
-      - "${NETWORKING_POSTGRES_DB_EXTERNAL_PORT}:${NETWORKING_POSTGRES_DB_INTERNAL_PORT}"
+      - "${USER_POSTGRES_DB_EXTERNAL_PORT}:${USER_POSTGRES_DB_INTERNAL_PORT}"
     environment:
-      PGPORT: ${NETWORKING_POSTGRES_DB_INTERNAL_PORT}
-      POSTGRES_DB: ${NETWORKING_POSTGRES_DB_NAME}
-      POSTGRES_USER: ${NETWORKING_POSTGRES_DB_USER}
-      POSTGRES_PASSWORD: ${NETWORKING_POSTGRES_DB_PASSWORD}
+      PGPORT: ${USER_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_DB: ${USER_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${USER_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${USER_POSTGRES_DB_PASSWORD}
     volumes:
-      - networking-db-postgres:/var/lib/postgresql/data
+      - user-db-postgres:/var/lib/postgresql/data
       - ./component/UserMicro/src/main/resources/data/tables_postgres.sql:/docker-entrypoint-initdb.d/tables_postgres.sql
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $NETWORKING_POSTGRES_DB_USER -d $NETWORKING_POSTGRES_DB_NAME'" ]
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $USER_POSTGRES_DB_USER -d $USER_POSTGRES_DB_NAME'" ]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}
@@ -120,17 +121,17 @@ services:
     env_file:
       - ./.env
     environment:
-      POSTGRES_DB_HOST: ${MESSENGER_POSTGRES_DB_HOST}
-      POSTGRES_DB: ${MESSENGER_POSTGRES_DB_NAME}
-      POSTGRES_DB_INTERNAL_PORT: ${MESSENGER_POSTGRES_DB_INTERNAL_PORT}
-      POSTGRES_USER: ${MESSENGER_POSTGRES_DB_USER}
-      POSTGRES_PASSWORD: ${MESSENGER_POSTGRES_DB_PASSWORD}
-      PGSSLMODE_STATUS: ${MESSENGER_PGSSLMODE_STATUS}
+      POSTGRES_DB_HOST: ${CHAT_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${CHAT_POSTGRES_DB_NAME}
+      POSTGRES_DB_INTERNAL_PORT: ${CHAT_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_USER: ${CHAT_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${CHAT_POSTGRES_DB_PASSWORD}
+      PGSSLMODE_STATUS: ${CHAT_PGSSLMODE_STATUS}
       DB_AUTO_MIGRATE: true
       LOG_OUTPUT: file
       LOG_DIR: logs
     depends_on:
-      messenger-db-postgres:
+      chat-db-postgres:
         condition: service_healthy
     restart: unless-stopped
     networks:
@@ -140,16 +141,16 @@ services:
   chat-db-postgres:
     image: postgres:16-alpine
     ports:
-      - "${MESSENGER_POSTGRES_DB_EXTERNAL_PORT}:${MESSENGER_POSTGRES_DB_INTERNAL_PORT}"
+      - "${CHAT_POSTGRES_DB_EXTERNAL_PORT}:${CHAT_POSTGRES_DB_INTERNAL_PORT}"
     environment:
-      PGPORT: ${MESSENGER_POSTGRES_DB_INTERNAL_PORT}
-      POSTGRES_DB: ${MESSENGER_POSTGRES_DB_NAME}
-      POSTGRES_USER: ${MESSENGER_POSTGRES_DB_USER}
-      POSTGRES_PASSWORD: ${MESSENGER_POSTGRES_DB_PASSWORD}
+      PGPORT: ${CHAT_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_DB: ${CHAT_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${CHAT_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${CHAT_POSTGRES_DB_PASSWORD}
     volumes:
       - chat-db-postgres:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $MESSENGER_POSTGRES_DB_USER -d $MESSENGER_POSTGRES_DB_NAME'" ]
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $CHAT_POSTGRES_DB_USER -d $CHAT_POSTGRES_DB_NAME'" ]
       interval: ${HEALTHCHECK_INTERVAL}
       timeout: ${HEALTHCHECK_TIMEOUT}
       retries: ${HEALTHCHECK_RETRIES}

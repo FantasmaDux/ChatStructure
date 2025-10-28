@@ -8,21 +8,17 @@ http:
 #      middlewares:
 #        - strip-auth-prefix
 
-    networking-service:
-      rule: "PathPrefix(`/networking`)"
-      service: networking-service
+    user-service:
+      rule: "PathPrefix(`/user`)"
+      service: user-service
       entryPoints:
         - web
-#      middlewares:
-#        - strip-networking-prefix
 
-    messenger-service:
-      rule: "PathPrefix(`/messenger`)"
-      service: messenger-service
+    chat-service:
+      rule: "PathPrefix(`/chat`)"
+      service: chat-service
       entryPoints:
         - web
-#      middlewares:
-#        - strip-networking-prefix
 
     kafka-ui-router:  # должно быть уникальным
       rule: "PathPrefix(`/kafka-ui`)"

@@ -4,8 +4,3 @@
 #      stripPrefix:
 #        prefixes:
 #          - /auth
-#
-#    strip-networking-prefix:
-#      stripPrefix:
-#        prefixes:
-#          - /networking

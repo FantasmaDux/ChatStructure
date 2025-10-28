@@ -9,19 +9,19 @@ http:
           interval: "10s"
           timeout: "3s"
 
-    networking-service:
+    user-service:
       loadBalancer:
         servers:
-          - url: "http://networking-service:8080"
+          - url: "http://user-service:8080"
         healthCheck:
           path: "/actuator/health"
           interval: "10s"
           timeout: "3s"
 
-    messenger-service:
+    chat-service:
       loadBalancer:
         servers:
-          - url: "http://messenger-service:8080"
+          - url: "http://chat-service:8080"
         healthCheck:
           path: "/actuator/health"
           interval: "10s"
