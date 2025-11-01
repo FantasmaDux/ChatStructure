@@ -1,0 +1,224 @@
+services:
+  traefik:
+    container_name: traefik
+    image: traefik:v3.4
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - shared-network
+    env_file:
+      - ./.env
+    ports:
+      - "${HTTP_PORT}:${HTTP_PORT}"
+      - "8088:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefic.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic:/dynamic:ro
+    labels:
+      - "traefik.http.middlewares.dashboard-auth.basicauth.users=${BASIC_AUTH_USER_PASS}"
+
+
+  auth-service:
+    container_name: auth-service
+    build:
+      context: ./component/AuthMicro
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB_HOST: ${AUTH_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${AUTH_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${AUTH_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_DB_PASSWORD}
+      POSTGRES_DB_INTERNAL_PORT: ${AUTH_POSTGRES_DB_INTERNAL_PORT}
+      PGSSLMODE_STATUS: ${AUTH_PGSSLMODE_STATUS}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION}
+      JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION}
+      LOG_LEVEL: debug
+    depends_on:
+      auth-db-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - auth-network
+      - shared-network
+
+  auth-db-postgres:
+    image: postgres:16-alpine
+    ports:
+      - "${AUTH_POSTGRES_DB_EXTERNAL_PORT}:${AUTH_POSTGRES_DB_INTERNAL_PORT}"
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB: ${AUTH_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${AUTH_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_DB_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $AUTH_POSTGRES_DB_USER -d $AUTH_POSTGRES_DB_NAME'" ]
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: ${HEALTHCHECK_TIMEOUT}
+      retries: ${HEALTHCHECK_RETRIES}
+    volumes:
+      - auth-db-postgres:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - auth-network
+
+
+  user-service:
+    build:
+      context: ./component/UserMicro
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB_HOST: ${USER_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${USER_POSTGRES_DB_NAME}
+      POSTGRES_DB_INTERNAL_PORT: ${USER_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_USER: ${USER_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${USER_POSTGRES_DB_PASSWORD}
+      PGSSLMODE_STATUS: ${USER_PGSSLMODE_STATUS}
+      DB_AUTO_MIGRATE: true
+      LOG_OUTPUT: file
+      LOG_DIR: logs
+    depends_on:
+      user-db-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - user-network
+      - shared-network
+
+  user-db-postgres:
+    image: postgres:16-alpine
+    ports:
+      - "${USER_POSTGRES_DB_EXTERNAL_PORT}:${USER_POSTGRES_DB_INTERNAL_PORT}"
+    environment:
+      PGPORT: ${USER_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_DB: ${USER_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${USER_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${USER_POSTGRES_DB_PASSWORD}
+    volumes:
+      - user-db-postgres:/var/lib/postgresql/data
+      - ./component/UserMicro/src/main/resources/data/tables_postgres.sql:/docker-entrypoint-initdb.d/tables_postgres.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $USER_POSTGRES_DB_USER -d $USER_POSTGRES_DB_NAME'" ]
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: ${HEALTHCHECK_TIMEOUT}
+      retries: ${HEALTHCHECK_RETRIES}
+    networks:
+      - user-network
+
+
+
+  chat-service:
+    build:
+      context: ./component/ChatMicro
+      dockerfile: Dockerfile
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_DB_HOST: ${CHAT_POSTGRES_DB_HOST}
+      POSTGRES_DB: ${CHAT_POSTGRES_DB_NAME}
+      POSTGRES_DB_INTERNAL_PORT: ${CHAT_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_USER: ${CHAT_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${CHAT_POSTGRES_DB_PASSWORD}
+      PGSSLMODE_STATUS: ${CHAT_PGSSLMODE_STATUS}
+      DB_AUTO_MIGRATE: true
+      LOG_OUTPUT: file
+      LOG_DIR: logs
+    depends_on:
+      chat-db-postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - chat-network
+      - shared-network
+
+  chat-db-postgres:
+    image: postgres:16-alpine
+    ports:
+      - "${CHAT_POSTGRES_DB_EXTERNAL_PORT}:${CHAT_POSTGRES_DB_INTERNAL_PORT}"
+    environment:
+      PGPORT: ${CHAT_POSTGRES_DB_INTERNAL_PORT}
+      POSTGRES_DB: ${CHAT_POSTGRES_DB_NAME}
+      POSTGRES_USER: ${CHAT_POSTGRES_DB_USER}
+      POSTGRES_PASSWORD: ${CHAT_POSTGRES_DB_PASSWORD}
+    volumes:
+      - chat-db-postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $CHAT_POSTGRES_DB_USER -d $CHAT_POSTGRES_DB_NAME'" ]
+      interval: ${HEALTHCHECK_INTERVAL}
+      timeout: ${HEALTHCHECK_TIMEOUT}
+      retries: ${HEALTHCHECK_RETRIES}
+    networks:
+      - chat-network
+
+  kafka:
+    image: apache/kafka:4.1.0         # KRaft mode, без ZooKeeper
+    environment:
+      - KAFKA_NODE_ID=1               # ID узла в кластере. Нужен для распределённых конфигураций.
+      - KAFKA_PROCESS_ROLES=broker,controller       # Узел broker — обслуживает клиентов и controller — управляет метаданными кластера
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093   # 1 — ID этого нода kafka:x — адрес, по которому этот узел доступен как контроллер
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,INTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER  # какой из listeners используется для ролей контроллера.
+      - KAFKA_LOG_DIRS=/tmp/logs                    # Путь внутри контейнера, куда Kafka будет писать данные
+      - KAFKA_LISTENERS=PLAINTEXT://:9096,CONTROLLER://:9093,INTERNAL://:9098
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9096,INTERNAL://kafka:9098 # PLAINTEXT://kafka:9096 — для клиентов
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_NUM_PARTITIONS=3  # количество партиций
+      - KAFKA_DEFAULT_REPLICATION_FACTOR=1
+      # Ниже для прода:
+#      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=3
+#      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=3
+#      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=2
+#      - KAFKA_NUM_PARTITIONS=6
+#      - KAFKA_DEFAULT_REPLICATION_FACTOR=3
+    ports:
+      - "0.0.0.0:9096:9096"
+    volumes:
+      - kafka-data:/tmp/kafka-logs
+    networks:
+      - shared-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    restart: "always"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local          # Имя отображаемого кластера в UI — "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9098
+      SERVER_SERVLET_CONTEXT_PATH: /kafka-ui
+    depends_on:
+      - kafka
+    networks:
+      - shared-network
+
+volumes:
+  auth-db-postgres:
+  user-db-postgres:
+  chat-db-postgres:
+  kafka-data:
+
+networks:
+  shared-network:
+    name: shared-network
+    driver: bridge
+
+  auth-network:
+    name: auth-network
+    driver: bridge
+
+  user-network:
+    name: user-network
+    driver: bridge
+
+  chat-network:
+    name: chat-network
+    driver: bridge

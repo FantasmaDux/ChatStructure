@@ -1,0 +1,27 @@
+http:
+  routers:
+    auth-service:
+      rule: "PathPrefix(`/auth`)"
+      service: auth-service
+      entryPoints:
+        - web
+#      middlewares:
+#        - strip-auth-prefix
+
+    user-service:
+      rule: "PathPrefix(`/user`)"
+      service: user-service
+      entryPoints:
+        - web
+
+    chat-service:
+      rule: "PathPrefix(`/chat`)"
+      service: chat-service
+      entryPoints:
+        - web
+
+    kafka-ui-router:  # должно быть уникальным
+      rule: "PathPrefix(`/kafka-ui`)"
+      service: kafka-ui-service  # должно совпадать с именем сервиса
+      entryPoints:
+        - web

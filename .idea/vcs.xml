@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/component/AuthMicro" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/component/ChatMicro" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/component/UserMicro" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/component/WebsocketMicro" vcs="Git" />
+  </component>
+</project>

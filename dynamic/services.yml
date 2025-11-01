@@ -1,0 +1,34 @@
+http:
+  services:
+    auth-service:
+      loadBalancer:
+        servers:
+          - url: "http://auth-service:8080"
+        healthCheck:
+          path: "/actuator/health"
+          interval: "10s"
+          timeout: "3s"
+
+    user-service:
+      loadBalancer:
+        servers:
+          - url: "http://user-service:8080"
+        healthCheck:
+          path: "/actuator/health"
+          interval: "10s"
+          timeout: "3s"
+
+    chat-service:
+      loadBalancer:
+        servers:
+          - url: "http://chat-service:8080"
+        healthCheck:
+          path: "/actuator/health"
+          interval: "10s"
+          timeout: "3s"
+
+
+    kafka-ui-service:  # должно быть уникальным
+      loadBalancer:
+        servers:
+          - url: "http://kafka-ui:8080"
